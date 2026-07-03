@@ -16,6 +16,7 @@ public class SimulationJava extends JFrame {
 
         JPanel panel = new RadioButtonPanelBuilder(5, 1, this::handlePetSelection)
                 .withDefault("Pig")
+                .withDefaultInit(this::updateImage)
                 .build(pets);
 
         add(panel, BorderLayout.WEST);
@@ -27,8 +28,12 @@ public class SimulationJava extends JFrame {
     }
 
     private void handlePetSelection(String pet) {
-        ImageUtils.displayImage(imageLabel, pet);
+        updateImage(pet);
         JOptionPane.showMessageDialog(this, "You selected: " + pet);
+    }
+
+    private void updateImage(String pet) {
+        ImageUtils.displayImage(imageLabel, pet);
     }
 
     public static void main(String[] args) {

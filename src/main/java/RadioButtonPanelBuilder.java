@@ -7,6 +7,7 @@ public class RadioButtonPanelBuilder {
     private final ButtonGroup group = new ButtonGroup();
     private final JPanel panel;
     private final Consumer<String> onSelection;
+    private Consumer<String> onDefaultInit;
     private String defaultSelection;
 
     public RadioButtonPanelBuilder(Consumer<String> onSelection) {
@@ -21,9 +22,20 @@ public class RadioButtonPanelBuilder {
 
     /**
      * Sets which option should be selected by default.
+     * Uses onSelection as the default init callback unless overridden
+     * via {@link #withDefaultInit(Consumer)}.
      */
     public RadioButtonPanelBuilder withDefault(String defaultOption) {
         this.defaultSelection = defaultOption;
+        return this;
+    }
+
+    /**
+     * Sets a separate callback for the initial default selection,
+     * so it can differ from the interactive selection callback.
+     */
+    public RadioButtonPanelBuilder withDefaultInit(Consumer<String> onDefaultInit) {
+        this.onDefaultInit = onDefaultInit;
         return this;
     }
 
@@ -40,7 +52,8 @@ public class RadioButtonPanelBuilder {
 
             if (option.equals(defaultSelection)) {
                 button.setSelected(true);
-                onSelection.accept(option);
+                Consumer<String> initCallback = onDefaultInit != null ? onDefaultInit : onSelection;
+                initCallback.accept(option);
             }
         }
         return panel;
