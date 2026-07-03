@@ -12,33 +12,12 @@ public class SimulationJava extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
-        // Panel for radio buttons
-        JPanel panel = new JPanel(new GridLayout(5, 1));
-
-        ButtonGroup group = new ButtonGroup();
-
         imageLabel = new JLabel("", JLabel.CENTER);
 
-        // Create radio buttons
-        for (String pet : pets) {
-
-            JRadioButton button = new JRadioButton(pet);
-
-            button.addActionListener(e -> {
-                updateImage(pet);
-                JOptionPane.showMessageDialog(this,
-                        "You selected: " + pet);
-            });
-
-            group.add(button);
-            panel.add(button);
-
-            // Default selection
-            if (pet.equals("Pig")) {
-                button.setSelected(true);
-                updateImage("Pig");   // Display Pig image immediately
-            }
-        }
+        JPanel panel = new RadioButtonPanelBuilder(5, 1, this::handlePetSelection)
+                .withDefault("Pig")
+                .withDefaultInit(this::updateImage)
+                .build(pets);
 
         add(panel, BorderLayout.WEST);
         add(imageLabel, BorderLayout.CENTER);
@@ -48,18 +27,13 @@ public class SimulationJava extends JFrame {
         setVisible(true);
     }
 
+    private void handlePetSelection(String pet) {
+        updateImage(pet);
+        JOptionPane.showMessageDialog(this, "You selected: " + pet);
+    }
+
     private void updateImage(String pet) {
-
-        ImageIcon icon = new ImageIcon(pet.toLowerCase() + ".png");
-
-        // Check if image exists
-        if (icon.getIconWidth() == -1) {
-            imageLabel.setText("Image not found: " + pet.toLowerCase() + ".png");
-            imageLabel.setIcon(null);
-        } else {
-            imageLabel.setText("");
-            imageLabel.setIcon(icon);
-        }
+        ImageUtils.displayImage(imageLabel, pet);
     }
 
     public static void main(String[] args) {
