@@ -1,5 +1,9 @@
 import javax.swing.*;
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class SimulationJava extends JFrame {
 
@@ -49,20 +53,57 @@ public class SimulationJava extends JFrame {
     }
 
     private void updateImage(String pet) {
+        String filename = pet.toLowerCase() + ".png";
+        File imageFile = new File(filename);
 
-        ImageIcon icon = new ImageIcon(pet.toLowerCase() + ".png");
-
-        // Check if image exists
-        if (icon.getIconWidth() == -1) {
-            imageLabel.setText("Image not found: " + pet.toLowerCase() + ".png");
+        if (!imageFile.exists()) {
+            String message = "Image not found: " + filename;
+            System.err.println(message);
+            imageLabel.setText(message);
             imageLabel.setIcon(null);
-        } else {
+            return;
+        }
+
+        try {
+            BufferedImage image = ImageIO.read(imageFile);
+            if (image == null) {
+                String message = "Unable to read image (unsupported format): " + filename;
+                System.err.println(message);
+                imageLabel.setText(message);
+                imageLabel.setIcon(null);
+                return;
+            }
             imageLabel.setText("");
-            imageLabel.setIcon(icon);
+            imageLabel.setIcon(new ImageIcon(image));
+        } catch (IOException e) {
+            String message = "Error loading image: " + filename;
+            System.err.println(message + " - " + e.getMessage());
+            imageLabel.setText(message);
+            imageLabel.setIcon(null);
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new SimulationJava());
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            System.err.println("Uncaught exception in thread " + thread.getName() + ": " + throwable.getMessage());
+            throwable.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "An unexpected error occurred: " + throwable.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        });
+
+        SwingUtilities.invokeLater(() -> {
+            try {
+                new SimulationJava();
+            } catch (Exception e) {
+                System.err.println("Failed to initialize application: " + e.getMessage());
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null,
+                        "Failed to start the application: " + e.getMessage(),
+                        "Startup Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 }
